@@ -67,9 +67,33 @@ def is_admin():
     return commands.check(predicate)
 
 
-@bot.command(name='add', help="Add user to participants.")
+@bot.command(name='add', help="Add yourself to participants with name.")
+async def add(ctx, name: str = None):
+    """ Add the command invoker to the participants list with name.
+
+        Parameters:
+            :name: str, optional
+                name of the user for notifications.
+    """
+    user = ctx.author
+    if name is None:
+        name = user.display_name
+
+    await MM.add_user(ctx.guild.id, user.id, name)
+    await ctx.send(f'User {name} is now participating.')
+
+
+@bot.command(name='remove', help="Remove yourself from participants.")
+async def remove(ctx):
+    """ Remove the command invoker from the participants list. """
+    user = ctx.author
+    await MM.remove_user(ctx.guild.id, user.id, user.display_name)
+    await ctx.send(f'User {user.display_name} is no longer participating.')
+
+
+@bot.command(name='add_user', help="Add user to participants.")
 @commands.check_any(commands.is_owner(), is_admin())
-async def add_member(ctx, user: discord.Member = None, name: str = None):
+async def add_user(ctx, user: discord.Member = None, name: str = None):
     """ Add user to the participants list.
 
         Parameters:
@@ -89,9 +113,9 @@ async def add_member(ctx, user: discord.Member = None, name: str = None):
     await ctx.send(f'User {name} is now participating.')
 
 
-@bot.command(name='remove', help="Remove user from participants.")
+@bot.command(name='remove_user', help="Remove user from participants.")
 @commands.check_any(commands.is_owner(), is_admin())
-async def remove_member(ctx, user: discord.Member = None):
+async def remove_user(ctx, user: discord.Member = None):
     """ Remove user from the participants list.
 
         Parameters:
