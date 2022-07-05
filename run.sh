@@ -13,9 +13,5 @@ echo setting up database...
 python3 database.py
 echo finished setting up database
 
-echo loading backup into database...
-python3 backup.py
-echo finished loading backup into database
-
 echo starting Discord bot...
 python3 bot.py

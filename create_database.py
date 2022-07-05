@@ -21,6 +21,9 @@ load_dotenv()
 DB_FILE = os.getenv('DATABASE_FILE')
 
 
+delete = False
+
+
 async def create_users_table(con, cur) -> None:
     """ Create the users table. """
     await cur.execute(
@@ -76,7 +79,7 @@ async def create_bans_table(con, cur) -> None:
 
 
 async def main():
-    if os.path.exists(DB_FILE):
+    if delete:
         os.remove(DB_FILE)
 
     con = await aiosqlite.connect(DB_FILE)
