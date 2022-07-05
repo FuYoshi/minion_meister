@@ -22,6 +22,7 @@ from error import (DeleteError, InsertError, InvalidDateError, NoAdminsError,
                    NoMinionMeisterError, NoParticipantsError)
 from minion_meister import MinionMeister
 from tools import is_date
+from webserver import keep_alive
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -212,4 +213,5 @@ async def unadmin(ctx, user: discord.Member):
     await ctx.send(f'User {user.display_name} is no longer an admin.')
 
 
+keep_alive()
 bot.run(TOKEN)
