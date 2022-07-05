@@ -11,9 +11,11 @@ Summary:
 - [TODO]
 """
 
+import os
 from datetime import datetime
 
 from aiosqlite import connect
+from dotenv import load_dotenv
 
 
 async def read_from_database(db_filename: str, sql: str, values=None) -> list:
@@ -91,3 +93,10 @@ def is_date(date: str) -> bool:
         return bool(datetime.strptime(date, '%Y-%m-%d'))
     except ValueError:
         return False
+
+
+def get_database():
+    """ Load the database file environment variable and return it. """
+    load_dotenv()
+    DB_FILE = os.getenv('DATABASE_FILE')
+    return DB_FILE

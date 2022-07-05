@@ -8,6 +8,7 @@ Date:     July 24th 2022
 Summary:
 - [TODO]
 """
+
 from threading import Thread
 
 from flask import Flask
