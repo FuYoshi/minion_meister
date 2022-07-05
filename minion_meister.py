@@ -219,7 +219,7 @@ class MinionMeister:
         return await self._in_admins_(server_id, user_id)
 
     async def admin_user(self, server_id: int, user_id: int,
-                       display_name: str) -> None:
+                         display_name: str) -> None:
         """ Add user to admins of server with server_id.
 
             Parameters:
@@ -238,7 +238,7 @@ class MinionMeister:
         await self._insert_admin_(server_id, user_id)
 
     async def unadmin_user(self, server_id: int, user_id: int,
-                         display_name: str) -> None:
+                           display_name: str) -> None:
         """ Remove user from admins of server with server_id.
 
             Parameters:

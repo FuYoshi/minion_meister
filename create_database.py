@@ -11,6 +11,7 @@ Summary:
 - [TODO]
 """
 
+import argparse
 import asyncio
 import os
 
@@ -21,7 +22,13 @@ load_dotenv()
 DB_FILE = os.getenv('DATABASE_FILE')
 
 
-delete = False
+def argparser():
+    """ Check for commandline arguments. """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--delete', action='store_true',
+                        help="Delete current database")
+    args = parser.parse_args()
+    return args
 
 
 async def create_users_table(con, cur) -> None:
@@ -79,7 +86,9 @@ async def create_admins_table(con, cur) -> None:
 
 
 async def main():
-    if delete:
+    args = argparser()
+
+    if args.delete:
         os.remove(DB_FILE)
 
     con = await aiosqlite.connect(DB_FILE)
