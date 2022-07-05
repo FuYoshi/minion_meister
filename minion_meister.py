@@ -1,0 +1,429 @@
+#!/usr/bin/env python3
+"""
+Filename: minion_meister.py
+Authors:  Yoshi Fu
+Project:  Minion Meister Discord Bot
+Date:     July 24th 2022
+
+Summary:
+- MinionMeister class that handles database calls.
+- Add and remove users from the database.
+- Select a random winner from the participands of a server.
+- Show how many times every participant has become Minion Meister.
+- [TODO]
+"""
+
+from error import (DeleteError, InsertError, NoMinionMeisterError,
+                   NoParticipantsError)
+from tools import push_to_database, read_from_database
+
+
+class MinionMeister:
+    """ Create a Minion Meister Object that handles database calls.
+
+        [TODO]
+    """
+    def __init__(self, database_filename: str) -> None:
+        """ Initialise the database to connect to. """
+        self.database = database_filename
+
+    async def add_user(self, server_id: int, user_id: int,
+                       display_name: str) -> None:
+        """ Add user to the database.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+                :display_name: str, required
+                    display name of the user.
+
+            Returns:
+                None
+
+            Raises:
+                InsertError, if record already exists.
+        """
+        if await self._in_users_(server_id, user_id):
+            raise InsertError(display_name, 'participating')
+        await self._insert_user_(server_id, user_id, display_name)
+        await self._initialise_count_(server_id, user_id)
+
+    async def remove_user(self, server_id: int, user_id: int,
+                          display_name: str) -> None:
+        """ Remove user from the database.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+                :display_name: str, required
+                    display name of the user.
+
+            Returns:
+                None
+
+            Raises:
+                DeleteError, if record does not exist.
+        """
+        if not await self._in_users_(server_id, user_id):
+            raise DeleteError(display_name, 'participating')
+        await self._delete_user_(server_id, user_id)
+
+    async def select_winner(self, server_id: int) -> int:
+        """ Select a random user in the participants list.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+
+            Returns:
+                :user_id:
+                    unique id of the user.
+
+            Raises:
+                NoParticipantsError, if there are no participants.
+        """
+        user_id = await self._select_winner_(server_id)
+        await self._update_history_(server_id, user_id)
+        await self._update_count_(server_id, user_id)
+        return user_id
+
+    async def show_participants(self, server_id: int) -> list:
+        """ List all participants in the server.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+
+            Returns:
+                :names:
+                    list with the names of all participants.
+
+            Raises:
+                NoParticipantsError, if there are no participants.
+        """
+        names = await self._list_participants_(server_id)
+        names = [str(name[0]) for name in names]
+        return names
+
+    async def show_history(self, server_id: int, limit: int) -> tuple:
+        """ Show the previous Minion Meisters of the server.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :limit: int, required
+                    amount of history records to show (default: 5)
+
+            Returns:
+                :names:
+                    list of previous Minion Meister names.
+                :dates:
+                    dates previous Minion Meister got chosen.
+
+            Raises:
+                NoMinionMeisterError, if there are no previous Minion Meisters.
+        """
+        if limit is None:
+            limit = 5
+        history = await self._list_history(server_id, limit)
+        names, dates = zip(*history)
+        return names, dates
+
+    async def show_count(self, server_id: int) -> tuple:
+        """ Show how many times the participants became Minion Meister.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+
+            Returns:
+                :names:
+                    list of previous Minion Meister names.
+                :count:
+                    amount of times the user got chosen as Minion Meister.
+
+            Raises:
+                NoMinionMeisterError, if there are no previous Minion Meisters.
+        """
+        result = await self._list_counts_(server_id)
+        names, count = zip(*result)
+        return names, count
+
+    async def insert_history(self, server_id: int, user_id: int,
+                             date: str) -> None:
+        """ Insert a record with custom date into the history table.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+                :date: str, required
+                    date the user became Minion Meister.
+
+            Returns:
+                None
+
+            Raises:
+                NoMinionMeisterError, if there are no previous Minion Meisters.
+        """
+        await self._insert_history_(server_id, user_id, date)
+        await self._update_count_(server_id, user_id)
+
+    async def is_user(self, server_id: int, user_id: int) -> bool:
+        """ Check if a user is in the database for the given server.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+
+            Returns:
+                bool
+        """
+        return await self._in_users_(server_id, user_id)
+
+    async def show_banned(self, server_id):
+        """ List all participants in the server.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+
+            Returns:
+                :names:
+                    list with the names of all participants.
+
+            Raises:
+                NoParticipantsError, if there are no participants.
+        """
+        names = await self._list_banned_(server_id)
+        names = [str(name[0]) for name in names]
+        return names
+
+    async def ban_user(self, server_id: int, user_id: int,
+                       display_name: str) -> None:
+        """ Add user to blacklist of server with server_id.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+                :display_name: str, required
+                    display name of the user.
+
+            Returns:
+                None
+        """
+        if await self._in_bans_(server_id, user_id):
+            raise InsertError(display_name, 'banned')
+        await self._insert_ban_(server_id, user_id)
+
+    async def unban_user(self, server_id: int, user_id: int,
+                         display_name: str) -> None:
+        """ Remove user from blacklist of server with server_id.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+                :display_name: str, required
+                    display name of the user.
+
+            Returns:
+                None
+        """
+        if not await self._in_bans_(server_id, user_id):
+            raise DeleteError(display_name, 'banned')
+        await self._delete_ban_(server_id, user_id)
+
+    async def is_banned(self, server_id: int, user_id: int) -> bool:
+        """ Check if the user is on the blacklist of server with server_id.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+
+            Returns:
+                bool
+        """
+        return await self._in_bans_(server_id, user_id)
+
+    async def _insert_user_(self, server_id: int, user_id: int,
+                            display_name: str) -> None:
+        sql = (
+            "INSERT INTO users (id, server, name) "
+            "VALUES (?, ?, ?)"
+        )
+        values = (user_id, server_id, display_name)
+        await push_to_database(self.database, sql, values)
+
+    async def _delete_user_(self, server_id: int, user_id: int) -> None:
+        sql = (
+            "DELETE FROM users "
+            "WHERE server = (?) "
+            "AND id = (?)"
+        )
+        values = (server_id, user_id)
+        await push_to_database(self.database, sql, values)
+
+    async def _in_users_(self, server_id: int, user_id: int) -> bool:
+        sql = (
+            "SELECT EXISTS("
+            "SELECT 1 "
+            "FROM users "
+            "WHERE server = (?) "
+            "AND id = (?) "
+            "LIMIT 1"
+            ")"
+        )
+        values = (server_id, user_id)
+        result = await read_from_database(self.database, sql, values)
+        return bool(result[0][0])
+
+    async def _select_winner_(self, server_id: int) -> int:
+        sql = (
+            "SELECT id "
+            "FROM users "
+            "WHERE server = (?) "
+            "ORDER BY RANDOM() "
+            "LIMIT 1"
+        )
+        values = (server_id,)
+        user_id = await read_from_database(self.database, sql, values)
+        if not user_id:
+            raise NoParticipantsError
+        return user_id[0][0]
+
+    async def _list_participants_(self, server_id: int) -> list:
+        sql = (
+            "SELECT name "
+            "FROM users "
+            "WHERE server = (?) "
+            "ORDER BY name ASC"
+        )
+        values = (server_id,)
+        names = await read_from_database(self.database, sql, values)
+        if not names:
+            raise NoParticipantsError
+        return names
+
+    async def _update_history_(self, server_id: int, user_id: int) -> None:
+        sql = (
+            "INSERT INTO history (server, user, date) "
+            "VALUES (?, ?, DATE())"
+        )
+        values = (server_id, user_id)
+        await push_to_database(self.database, sql, values)
+
+    async def _insert_history_(self, server_id: int, user_id: int,
+                               date: str) -> None:
+        sql = (
+            "INSERT INTO history (server, user, date) "
+            "VALUES (?, ?, ?)"
+        )
+        values = (server_id, user_id, date)
+        await push_to_database(self.database, sql, values)
+
+    async def _list_history(self, server_id: int, limit: int) -> list:
+        sql = (
+            "SELECT users.name, history.date "
+            "FROM history "
+            "INNER JOIN users ON history.user = users.id "
+            "WHERE history.server = (?) "
+            "ORDER BY date DESC "
+            "LIMIT (?)"
+        )
+        values = (server_id, limit)
+        history = await read_from_database(self.database, sql, values)
+        if not history:
+            raise NoMinionMeisterError
+        return history
+
+    async def _initialise_count_(self, server_id: int, user_id: int) -> None:
+        sql = (
+            "INSERT OR IGNORE INTO counts (server, user, count) "
+            "VALUES (?, ?, ?)"
+        )
+        values = (server_id, user_id, 0)
+        await push_to_database(self.database, sql, values)
+
+    async def _update_count_(self, server_id: int, user_id: int) -> None:
+        sql = (
+            "UPDATE counts "
+            "SET count = count + 1 "
+            "WHERE server = (?) "
+            "AND user = (?)"
+        )
+        values = (server_id, user_id)
+        await push_to_database(self.database, sql, values)
+
+    async def _list_counts_(self, server_id: int) -> list:
+        sql = (
+            "SELECT users.name, counts.count "
+            "FROM counts "
+            "INNER JOIN users ON counts.user = users.id "
+            "AND counts.server = users.server "
+            "WHERE counts.server = (?) "
+            "ORDER BY counts.count DESC"
+        )
+        values = (server_id,)
+        counts = await read_from_database(self.database, sql, values)
+        if not counts:
+            raise NoMinionMeisterError
+        return counts
+
+    async def _list_banned_(self, server_id):
+        sql = (
+            "SELECT users.name "
+            "FROM users "
+            "INNER JOIN bans ON users.id = bans.user "
+            "AND users.server = bans.server "
+            "WHERE server = (?) "
+            "ORDER BY name ASC"
+        )
+        values = (server_id,)
+        names = await read_from_database(self.database, sql, values)
+        if not names:
+            raise NoParticipantsError
+        return names
+
+    async def _insert_ban_(self, server_id: int, user_id: int) -> None:
+        sql = (
+            "INSERT INTO bans (server, user) "
+            "VALUES (?, ?)"
+        )
+        values = (server_id, user_id)
+        await push_to_database(self.database, sql, values)
+
+    async def _delete_ban_(self, server_id: int, user_id: int) -> None:
+        sql = (
+            "DELETE FROM bans "
+            "WHERE server = (?) "
+            "AND user = (?)"
+        )
+        values = (server_id, user_id)
+        await push_to_database(self.database, sql, values)
+
+    async def _in_bans_(self, server_id: int, user_id: int) -> bool:
+        sql = (
+            "SELECT EXISTS("
+            "SELECT 1 "
+            "FROM bans "
+            "WHERE server = (?) "
+            "AND user = (?) "
+            "LIMIT 1"
+            ")"
+        )
+        values = (server_id, user_id)
+        result = await read_from_database(self.database, sql, values)
+        return bool(result[0][0])
