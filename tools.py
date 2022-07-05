@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-Filename: backup.py
+Filename: tools.py
 Authors:  Yoshi Fu
 Project:  Minion Meister Discord Bot
 Date:     July 24th 2022
 
 Summary:
+- Function to read from database.
+- Function to push to database.
 - [TODO]
 """
 

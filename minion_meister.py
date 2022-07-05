@@ -10,6 +10,7 @@ Summary:
 - Add and remove users from the database.
 - Select a random winner from the participands of a server.
 - Show how many times every participant has become Minion Meister.
+- Ban and unban users from using certain commands.
 - [TODO]
 """
 

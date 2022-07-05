@@ -8,8 +8,6 @@ Date:     July 24th 2022
 Summary:
 - Create database minion_meister.
 - Create tables servers, users, history.
-- Function to read from database.
-- Function to push to database.
 - [TODO]
 """
 
