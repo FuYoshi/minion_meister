@@ -6,6 +6,7 @@ Project:  Minion Meister Discord Bot
 Date:     July 24th 2022
 
 Summary:
+- MemberCog class that contains all commands for a member.
 - [TODO]
 """
 

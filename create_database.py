@@ -16,10 +16,10 @@ import asyncio
 import os
 
 import aiosqlite
-from dotenv import load_dotenv
 
-load_dotenv()
-DB_FILE = os.getenv('DATABASE_FILE')
+from tools import get_database
+
+DB_FILE = get_database()
 
 
 def argparser():

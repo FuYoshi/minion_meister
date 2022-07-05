@@ -10,15 +10,11 @@ Summary:
 """
 
 import asyncio
-import os
-
-from dotenv import load_dotenv
 
 from minion_meister import MinionMeister
+from tools import get_database
 
-load_dotenv()
-DB_FILE = os.getenv('DATABASE_FILE')
-MM = MinionMeister(DB_FILE)
+MM = MinionMeister(get_database())
 
 
 async def add_participants(server_id: int):

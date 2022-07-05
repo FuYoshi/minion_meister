@@ -6,6 +6,8 @@ Project:  Minion Meister Discord Bot
 Date:     July 24th 2022
 
 Summary:
+- OwnerCog class that contains all commands for an owner.
+- Check if the command invoker is the owner before executing command.
 - [TODO]
 """
 

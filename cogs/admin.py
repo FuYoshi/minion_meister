@@ -6,6 +6,8 @@ Project:  Minion Meister Discord Bot
 Date:     July 24th 2022
 
 Summary:
+- AdminCog class that contains all commands for an admin.
+- Check if the command invoker is an admin before executing command.
 - [TODO]
 """
 
@@ -23,7 +25,7 @@ class AdminCog(commands.Cog, name='Admin Commands'):
 
     async def cog_check(self, ctx):
         """ Check if the user is an admin (or the owner of the bot). """
-        if self.bot.is_owner(ctx.author):
+        if await self.bot.is_owner(ctx.author):
             return True
         return await self.MM.is_admin(ctx.guild.id, ctx.author.id)
 
