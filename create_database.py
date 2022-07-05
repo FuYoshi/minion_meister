@@ -65,10 +65,10 @@ async def create_counts_table(con, cur) -> None:
     await con.commit()
 
 
-async def create_bans_table(con, cur) -> None:
-    """ Create the bans table. """
+async def create_admins_table(con, cur) -> None:
+    """ Create the admins table. """
     await cur.execute(
-        "CREATE TABLE IF NOT EXISTS bans("
+        "CREATE TABLE IF NOT EXISTS admins("
         "server INTEGER NOT NULL, "
         "user INTEGER NOT NULL, "
         "PRIMARY KEY (server, user), "
@@ -88,7 +88,7 @@ async def main():
     await create_users_table(con, cur)
     await create_history_table(con, cur)
     await create_counts_table(con, cur)
-    await create_bans_table(con, cur)
+    await create_admins_table(con, cur)
 
     await cur.close()
     await con.close()

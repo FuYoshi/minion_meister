@@ -44,15 +44,14 @@ class NoParticipantsError(DatabaseError):
         super().__init__(*args, **kwargs)
 
 
+class NoAdminsError(DatabaseError):
+    """ Exception raised when there are no admins. """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 class InvalidDateError(UserInputError):
     """ Exception raised date is not the right format (yyyy-mm-dd). """
     def __init__(self, date, *args, **kwargs):
         self.date = date
-        super().__init__(*args, **kwargs)
-
-
-class OnBlacklistError(CommandError):
-    """ Exception raised when user is on the blacklist. """
-    def __init__(self, user, *args, **kwargs):
-        self.user = user
         super().__init__(*args, **kwargs)

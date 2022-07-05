@@ -10,12 +10,11 @@ Summary:
 - Add and remove users from the database.
 - Select a random winner from the participands of a server.
 - Show how many times every participant has become Minion Meister.
-- Ban and unban users from using certain commands.
 - [TODO]
 """
 
-from error import (DeleteError, InsertError, NoMinionMeisterError,
-                   NoParticipantsError)
+from error import (DeleteError, InsertError, NoAdminsError,
+                   NoMinionMeisterError, NoParticipantsError)
 from tools import push_to_database, read_from_database
 
 
@@ -189,7 +188,7 @@ class MinionMeister:
         """
         return await self._in_users_(server_id, user_id)
 
-    async def show_banned(self, server_id):
+    async def show_admins(self, server_id):
         """ List all participants in the server.
 
             Parameters:
@@ -203,61 +202,59 @@ class MinionMeister:
             Raises:
                 NoParticipantsError, if there are no participants.
         """
-        names = await self._list_banned_(server_id)
+        names = await self._list_admins_(server_id)
         names = [str(name[0]) for name in names]
         return names
 
-    async def ban_user(self, server_id: int, user_id: int,
-                       display_name: str) -> None:
-        """ Add user to blacklist of server with server_id.
-
+    async def is_admin(self, server_id: int, user_id: int) -> bool:
+        """ Check if the user is an admin of server with server_id.
             Parameters:
                 :server_id: int, required
                     unique id of the server.
                 :user_id: int, required
                     unique id of the user.
-                :display_name: str, required
-                    display name of the user.
-
-            Returns:
-                None
-        """
-        if await self._in_bans_(server_id, user_id):
-            raise InsertError(f'User {display_name} is already banned.')
-        await self._insert_ban_(server_id, user_id)
-
-    async def unban_user(self, server_id: int, user_id: int,
-                         display_name: str) -> None:
-        """ Remove user from blacklist of server with server_id.
-
-            Parameters:
-                :server_id: int, required
-                    unique id of the server.
-                :user_id: int, required
-                    unique id of the user.
-                :display_name: str, required
-                    display name of the user.
-
-            Returns:
-                None
-        """
-        if not await self._in_bans_(server_id, user_id):
-            raise DeleteError(f'User {display_name} is not banned.')
-        await self._delete_ban_(server_id, user_id)
-
-    async def is_banned(self, server_id: int, user_id: int) -> bool:
-        """ Check if the user is on the blacklist of server with server_id.
-
-            Parameters:
-                :server_id: int, required
-                    unique id of the server.
-                :user_id: int, required
-                    unique id of the user.
-
             Returns:
                 bool
         """
-        return await self._in_bans_(server_id, user_id)
+        return await self._in_admins_(server_id, user_id)
+
+    async def admin_user(self, server_id: int, user_id: int,
+                       display_name: str) -> None:
+        """ Add user to admins of server with server_id.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+                :display_name: str, required
+                    display name of the user.
+
+            Returns:
+                None
+        """
+        if await self._in_admins_(server_id, user_id):
+            raise InsertError(f'User {display_name} is already admin.')
+        await self._insert_admin_(server_id, user_id)
+
+    async def unadmin_user(self, server_id: int, user_id: int,
+                         display_name: str) -> None:
+        """ Remove user from admins of server with server_id.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+                :display_name: str, required
+                    display name of the user.
+
+            Returns:
+                None
+        """
+        if not await self._in_admins_(server_id, user_id):
+            raise DeleteError(f'User {display_name} is not an admin.')
+        await self._delete_admin_(server_id, user_id)
 
     async def _insert_user_(self, server_id: int, user_id: int,
                             display_name: str) -> None:
@@ -383,43 +380,43 @@ class MinionMeister:
             raise NoMinionMeisterError
         return counts
 
-    async def _list_banned_(self, server_id):
+    async def _list_admins_(self, server_id):
         sql = (
             "SELECT users.name "
             "FROM users "
-            "INNER JOIN bans ON users.id = bans.user "
-            "AND users.server = bans.server "
-            "WHERE server = (?) "
+            "INNER JOIN admins ON users.id = admins.user "
+            "AND users.server = admins.server "
+            "WHERE users.server = (?) "
             "ORDER BY name ASC"
         )
         values = (server_id,)
         names = await read_from_database(self.database, sql, values)
         if not names:
-            raise NoParticipantsError
+            raise NoAdminsError
         return names
 
-    async def _insert_ban_(self, server_id: int, user_id: int) -> None:
+    async def _insert_admin_(self, server_id: int, user_id: int) -> None:
         sql = (
-            "INSERT INTO bans (server, user) "
+            "INSERT INTO admins (server, user) "
             "VALUES (?, ?)"
         )
         values = (server_id, user_id)
         await push_to_database(self.database, sql, values)
 
-    async def _delete_ban_(self, server_id: int, user_id: int) -> None:
+    async def _delete_admin_(self, server_id: int, user_id: int) -> None:
         sql = (
-            "DELETE FROM bans "
+            "DELETE FROM admins "
             "WHERE server = (?) "
             "AND user = (?)"
         )
         values = (server_id, user_id)
         await push_to_database(self.database, sql, values)
 
-    async def _in_bans_(self, server_id: int, user_id: int) -> bool:
+    async def _in_admins_(self, server_id: int, user_id: int) -> bool:
         sql = (
             "SELECT EXISTS("
             "SELECT 1 "
-            "FROM bans "
+            "FROM admins "
             "WHERE server = (?) "
             "AND user = (?) "
             "LIMIT 1"

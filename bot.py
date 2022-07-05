@@ -18,8 +18,8 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from error import (DeleteError, InsertError, InvalidDateError,
-                   NoMinionMeisterError, NoParticipantsError, OnBlacklistError)
+from error import (DeleteError, InsertError, InvalidDateError, NoAdminsError,
+                   NoMinionMeisterError, NoParticipantsError)
 from minion_meister import MinionMeister
 from tools import is_date
 
@@ -51,31 +51,23 @@ async def on_command_error(ctx, error):
         await ctx.send(error.message)
     elif isinstance(error, NoParticipantsError):
         await ctx.send('There are no participants.')
+    elif isinstance(error, NoAdminsError):
+        await ctx.send('There are no admins.')
     elif isinstance(error, NoMinionMeisterError):
         await ctx.send('There are no previous Minion Meisters.')
     elif isinstance(error, InvalidDateError):
         await ctx.send(f'Date {error.date} should be of format: <yyyy-mm-dd>.')
-    elif isinstance(error, OnBlacklistError):
-        await ctx.send(f'User {error.user} does not have enough permissions.')
 
 
-def is_guild_owner():
-    """ Check if the command invoker is the owner of the server. """
-    def predicate(ctx):
-        return ctx.guild is not None and ctx.guild.owner_id == ctx.author.id
-    return commands.check(predicate)
-
-
-def is_not_banned():
+def is_admin():
     """ Check if the user is banned from using commands. """
     async def predicate(ctx):
-        return not await MM.is_banned(ctx.guild.id, ctx.author.id)
+        return await MM.is_admin(ctx.guild.id, ctx.author.id)
     return commands.check(predicate)
 
 
 @bot.command(name='add', help="Add user to participants.")
-@commands.check_any(commands.is_owner(), is_guild_owner())
-@is_not_banned()
+@commands.check_any(commands.is_owner(), is_admin())
 async def add_member(ctx, user: discord.Member = None, name: str = None):
     """ Add user to the participants list.
 
@@ -97,8 +89,7 @@ async def add_member(ctx, user: discord.Member = None, name: str = None):
 
 
 @bot.command(name='remove', help="Remove user from participants.")
-@commands.check_any(commands.is_owner(), is_guild_owner())
-@is_not_banned()
+@commands.check_any(commands.is_owner(), is_admin())
 async def remove_member(ctx, user: discord.Member = None):
     """ Remove user from the participants list.
 
@@ -115,8 +106,7 @@ async def remove_member(ctx, user: discord.Member = None):
 
 
 @bot.command(name='roll', help="Select winner from participants.")
-@commands.check_any(commands.is_owner(), is_guild_owner())
-@is_not_banned()
+@commands.check_any(commands.is_owner(), is_admin())
 async def select_winner(ctx):
     """ Select a random winner from the participants list. """
     user_id = await MM.select_winner(ctx.guild.id)
@@ -186,41 +176,40 @@ async def insert_history(ctx, user: discord.Member, date: str,
     await MM.insert_history(ctx.guild.id, user.id, date)
 
 
-@bot.command(name='banned', help="Check if user is on the blacklist.")
-async def is_banned(ctx, user: discord.Member = None):
-    if user is None:
-        raise commands.MissingRequiredArgument(user)
+@bot.command(name='admin_list', help="Show list with all admins.")
+async def show_admins(ctx):
+    """ Show a list with all admins. """
+    admins = await MM.show_admins(ctx.guild.id)
+    admins_str = '\n'.join(admins)
+    await ctx.send(f'Admins:\n{admins_str}')
 
-    result = await MM.is_banned(ctx.guild.id, user.id)
-    await ctx.send(f'User {user.display_name} on blacklist: {result}')
 
-
-@bot.command(name='ban', hidden=True,
-             help="Ban user with permissions from using certain commands.")
+@bot.command(name='admin', hidden=True,
+             help="Give permissions to user for certain commands.")
 @commands.is_owner()
-async def ban(ctx, user: discord.Member):
-    """ Add a user to the blacklist of the server.
+async def admin(ctx, user: discord.Member):
+    """ Add a user to the admins of the server.
 
         Parameters:
             :user: discord.Member, required
-                user to add to the blacklist of the server.
+                user to add to the admins of the server.
     """
-    await MM.ban_user(ctx.guild.id, user.id, user.display_name)
-    await ctx.send(f'User {user.display_name} is added to the blacklist.')
+    await MM.admin_user(ctx.guild.id, user.id, user.display_name)
+    await ctx.send(f'User {user.display_name} is now an admin.')
 
 
-@bot.command(name='unban', hidden=True,
-             help="Unban user with permissions from using certain commands.")
+@bot.command(name='unadmin', hidden=True,
+             help="Take permissions from user for certain commands.")
 @commands.is_owner()
-async def unban(ctx, user: discord.Member):
-    """ Remove a user from the blacklist of the server.
+async def unadmin(ctx, user: discord.Member):
+    """ Remove a user from the admins of the server.
 
         Parameters:
             :user: discord.Member, required
-                user to remove from the blacklist of the server.
+                user to remove from the admins of the server.
     """
-    await MM.unban_user(ctx.guild.id, user.id, user.display_name)
-    await ctx.send(f'User {user.display_name} is removed from the blacklist.')
+    await MM.unadmin_user(ctx.guild.id, user.id, user.display_name)
+    await ctx.send(f'User {user.display_name} is no longer an admin.')
 
 
 bot.run(TOKEN)
