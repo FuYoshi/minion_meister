@@ -47,7 +47,7 @@ class MinionMeister:
                 InsertError, if record already exists.
         """
         if await self._in_users_(server_id, user_id):
-            raise InsertError(display_name, 'participating')
+            raise InsertError(f'User {display_name} is already participating.')
         await self._insert_user_(server_id, user_id, display_name)
         await self._initialise_count_(server_id, user_id)
 
@@ -70,7 +70,7 @@ class MinionMeister:
                 DeleteError, if record does not exist.
         """
         if not await self._in_users_(server_id, user_id):
-            raise DeleteError(display_name, 'participating')
+            raise DeleteError(f'User {display_name} is not participating.')
         await self._delete_user_(server_id, user_id)
 
     async def select_winner(self, server_id: int) -> int:
@@ -223,7 +223,7 @@ class MinionMeister:
                 None
         """
         if await self._in_bans_(server_id, user_id):
-            raise InsertError(display_name, 'banned')
+            raise InsertError(f'User {display_name} is already banned.')
         await self._insert_ban_(server_id, user_id)
 
     async def unban_user(self, server_id: int, user_id: int,
@@ -242,7 +242,7 @@ class MinionMeister:
                 None
         """
         if not await self._in_bans_(server_id, user_id):
-            raise DeleteError(display_name, 'banned')
+            raise DeleteError(f'User {display_name} is not banned.')
         await self._delete_ban_(server_id, user_id)
 
     async def is_banned(self, server_id: int, user_id: int) -> bool:

@@ -46,9 +46,9 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(f'Missing required argument: {error.param.name}.')
     elif isinstance(error, InsertError):
-        await ctx.send(f'User {error.record} is already {error.table}.')
+        await ctx.send(error.message)
     elif isinstance(error, DeleteError):
-        await ctx.send(f'User {error.record} is not {error.table}.')
+        await ctx.send(error.message)
     elif isinstance(error, NoParticipantsError):
         await ctx.send('There are no participants.')
     elif isinstance(error, NoMinionMeisterError):
@@ -56,7 +56,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, InvalidDateError):
         await ctx.send(f'Date {error.date} should be of format: <yyyy-mm-dd>.')
     elif isinstance(error, OnBlacklistError):
-        await ctx.send(f'User {error.user} is on the blacklist.')
+        await ctx.send(f'User {error.user} does not have enough permissions.')
 
 
 def is_guild_owner():

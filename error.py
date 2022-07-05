@@ -20,17 +20,15 @@ class DatabaseError(CommandError):
 
 class InsertError(DatabaseError):
     """ Exception raised when inserting a record that does exist. """
-    def __init__(self, record, table, *args, **kwargs):
-        self.record = record
-        self.table = table
+    def __init__(self, message, *args, **kwargs):
+        self.message = message
         super().__init__(*args, **kwargs)
 
 
 class DeleteError(DatabaseError):
     """ Exception raised when deleting a record that does not exist. """
-    def __init__(self, record, table, *args, **kwargs):
-        self.record = record
-        self.table = table
+    def __init__(self, message, *args, **kwargs):
+        self.message = message
         super().__init__(*args, **kwargs)
 
 
