@@ -19,8 +19,7 @@ from dotenv import load_dotenv
 
 from error import (DeleteError, InsertError, InvalidDateError, NoAdminsError,
                    NoMinionMeisterError, NoParticipantsError)
-
-# from webserver import keep_alive
+from webserver import keep_alive
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -67,5 +66,5 @@ if __name__ == '__main__':
         bot.load_extension(cog)
 
 
-# keep_alive()
+keep_alive()
 bot.run(TOKEN)
