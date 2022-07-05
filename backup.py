@@ -35,6 +35,11 @@ async def add_participants(server_id: int):
     await MM.add_user(server_id, 175728174712356864, 'Stefan')
 
 
+async def add_admins(server_id: int):
+    await MM.admin_user(server_id, 172703726123876353, 'Joppe')
+    await MM.admin_user(server_id, 284044128449462272, 'Jord')
+
+
 async def insert_records(server_id: int):
     await MM.insert_history(server_id, 172703726123876353, '2022-05-28')
     await MM.insert_history(server_id, 476081297777754112, '2022-06-04')
@@ -47,6 +52,7 @@ async def insert_records(server_id: int):
 async def main():
     server_id = 431135841671315467
     await add_participants(server_id)
+    await add_admins(server_id)
     await insert_records(server_id)
 
 
