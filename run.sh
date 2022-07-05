@@ -10,7 +10,7 @@
 # - Start Discord bot.
 
 echo setting up database...
-python3 database.py
+python3 create_database.py
 echo finished setting up database
 
 echo starting Discord bot...
