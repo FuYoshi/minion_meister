@@ -91,7 +91,8 @@ async def remove(ctx):
     await ctx.send(f'User {user.display_name} is no longer participating.')
 
 
-@bot.command(name='add_user', help="Add user to participants.")
+@bot.command(name='add_user', hidden=True,
+             help="Add user to participants.")
 @commands.check_any(commands.is_owner(), is_admin())
 async def add_user(ctx, user: discord.Member = None, name: str = None):
     """ Add user to the participants list.
@@ -113,7 +114,8 @@ async def add_user(ctx, user: discord.Member = None, name: str = None):
     await ctx.send(f'User {name} is now participating.')
 
 
-@bot.command(name='remove_user', help="Remove user from participants.")
+@bot.command(name='remove_user',  hidden=True,
+             help="Remove user from participants.")
 @commands.check_any(commands.is_owner(), is_admin())
 async def remove_user(ctx, user: discord.Member = None):
     """ Remove user from the participants list.
