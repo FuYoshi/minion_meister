@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 
 from error import (DeleteError, InsertError, InvalidDateError, NoAdminsError,
                    NoMinionMeisterError, NoParticipantsError)
+from tools import argparser
 from webserver import keep_alive
 
 load_dotenv()
@@ -66,5 +67,8 @@ if __name__ == '__main__':
         bot.load_extension(cog)
 
 
-keep_alive()
+args = argparser()
+if args.webserver:
+    keep_alive()
+
 bot.run(TOKEN)

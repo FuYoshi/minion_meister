@@ -11,11 +11,23 @@ Summary:
 - [TODO]
 """
 
+import argparse
 import os
 from datetime import datetime
 
 from aiosqlite import connect
 from dotenv import load_dotenv
+
+
+def argparser():
+    """ Check for commandline arguments. """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--delete', action='store_true',
+                        help="Delete current database")
+    parser.add_argument('-w', '--webserver', action='store_true',
+                        help="Start webserver")
+    args = parser.parse_args()
+    return args
 
 
 async def read_from_database(db_filename: str, sql: str, values=None) -> list:
