@@ -8,6 +8,10 @@
 # - Create database.
 # - Start Discord bot.
 
+echo installing requirements...
+pip3 install -r requirements.txt
+echo finished installing requirements.
+
 echo setting up database...
 python3 create_database.py
 echo finished setting up database

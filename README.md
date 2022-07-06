@@ -26,7 +26,7 @@ Discord Bot API Usage Examples:
 https://discordpy.readthedocs.io/en/stable/faq.html#where-can-i-find-usage-examples
 
 Free Hosting:
-https://replit.com/@FuYoshi/Hosting-MinionMeister#main.py
+https://replit.com/@FuYoshi/minionmeister
 
 UptimeRobot:
 https://uptimerobot.com/dashboard?activated=1#792184332
