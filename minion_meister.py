@@ -167,12 +167,27 @@ class MinionMeister:
 
             Returns:
                 None
-
-            Raises:
-                NoMinionMeisterError, if there are no previous Minion Meisters.
         """
         await self._insert_history_(server_id, user_id, date)
         await self._update_count_(server_id, user_id)
+
+    async def delete_history(self, server_id: int, user_id: int,
+                             date: str) -> None:
+        """ Delete a record with date from the history table.
+
+            Parameters:
+                :server_id: int, required
+                    unique id of the server.
+                :user_id: int, required
+                    unique id of the user.
+                :date: str, required
+                    date the user became Minion Meister.
+
+            Returns:
+                None
+        """
+        await self._delete_history_(server_id, user_id, date)
+        await self._update_count_(server_id, user_id, delete=True)
 
     async def is_user(self, server_id: int, user_id: int) -> bool:
         """ Check if a user is in the database for the given server.
@@ -332,6 +347,17 @@ class MinionMeister:
         values = (server_id, user_id, date)
         await push_to_database(self.database, sql, values)
 
+    async def _delete_history_(self, server_id: int, user_id: int,
+                               date: str) -> None:
+        sql = (
+            "DELETE FROM history "
+            "WHERE server = (?) "
+            "AND user = (?) "
+            "AND date = (?)"
+        )
+        values = (server_id, user_id, date)
+        await push_to_database(self.database, sql, values)
+
     async def _list_history(self, server_id: int, limit: int) -> list:
         sql = (
             "SELECT users.name, history.date "
@@ -355,14 +381,17 @@ class MinionMeister:
         values = (server_id, user_id, 0)
         await push_to_database(self.database, sql, values)
 
-    async def _update_count_(self, server_id: int, user_id: int) -> None:
+    async def _update_count_(self, server_id: int, user_id: int,
+                             delete: bool = False) -> None:
         sql = (
             "UPDATE counts "
-            "SET count = count + 1 "
+            "SET count = count (?) 1 "
             "WHERE server = (?) "
             "AND user = (?)"
         )
-        values = (server_id, user_id)
+        values = ('+', server_id, user_id)
+        if delete:
+            values = ('-', server_id, user_id)
         await push_to_database(self.database, sql, values)
 
     async def _list_counts_(self, server_id: int) -> list:

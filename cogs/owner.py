@@ -53,7 +53,7 @@ class OwnerCog(commands.Cog, name='Owner Commands'):
         await ctx.send(f'User {user.display_name} is no longer an admin.')
 
     @commands.command(name='insert', hidden=True,
-                      help="Insert Minion Meister into history.")
+                      help="Insert Minion Meister entry into history.")
     async def insert_history(self, ctx, user: discord.Member, date: str,
                              name: str = None):
         """ Insert record into history where user became Minion Meister on date.
@@ -76,6 +76,28 @@ class OwnerCog(commands.Cog, name='Owner Commands'):
             raise InvalidDateError(date)
 
         await self.MM.insert_history(ctx.guild.id, user.id, date)
+
+    @commands.command(name='delete', hidden=True,
+                      help="Delete Minion Meister entry from history.")
+    async def delete_history(self, ctx, user: discord.Member, date: str,
+                             name: str = None):
+        """ Delete record from history where user became Minion Meister on date.
+
+            Parameters:
+                :user: discord.Member, required
+                    user to make Minion Meister
+                :date: str, required
+                    date user is made Minion Meister (format: yyyy-mm-dd).
+                :name: str, optional
+                    name of the user to be added (default: display_name).
+        """
+        if name is None:
+            name = user.display_name
+
+        if not is_date(date):
+            raise InvalidDateError(date)
+
+        await self.MM.delete_history(ctx.guild.id, user.id, date)
 
 
 def setup(bot):
