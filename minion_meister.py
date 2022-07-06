@@ -385,13 +385,18 @@ class MinionMeister:
                              delete: bool = False) -> None:
         sql = (
             "UPDATE counts "
-            "SET count = count (?) 1 "
+            "SET count = count + 1 "
             "WHERE server = (?) "
             "AND user = (?)"
         )
-        values = ('+', server_id, user_id)
         if delete:
-            values = ('-', server_id, user_id)
+            sql = (
+                "UPDATE counts "
+                "SET count = count - 1 "
+                "WHERE server = (?) "
+                "AND user = (?)"
+            )
+        values = (server_id, user_id)
         await push_to_database(self.database, sql, values)
 
     async def _list_counts_(self, server_id: int) -> list:
