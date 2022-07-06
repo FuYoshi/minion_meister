@@ -18,9 +18,8 @@ from tools import get_database
 
 @pytest.fixture(scope='function')
 def db_conn():
-    con = sqlite3.connect(get_database())
+    conn = sqlite3.connect(get_database())
 
-    yield con
+    yield conn
 
-    con.rollback()
-    con.close()
+    conn.close()

@@ -25,7 +25,7 @@ class MinionMeister:
     """
     def __init__(self, database_filename: str) -> None:
         """ Initialise the database to connect to. """
-        self.database = database_filename
+        self.db = database_filename
 
     async def add_user(self, server_id: int, user_id: int,
                        display_name: str) -> None:
@@ -263,7 +263,7 @@ class MinionMeister:
             "VALUES (?, ?, ?)"
         )
         values = (user_id, server_id, display_name)
-        await push_to_database(self.database, sql, values)
+        await push_to_database(self.db, sql, values)
 
     async def _delete_user_(self, server_id: int, user_id: int) -> None:
         sql = (
@@ -272,7 +272,7 @@ class MinionMeister:
             "AND id = (?)"
         )
         values = (server_id, user_id)
-        await push_to_database(self.database, sql, values)
+        await push_to_database(self.db, sql, values)
 
     async def _in_users_(self, server_id: int, user_id: int) -> bool:
         sql = (
@@ -285,7 +285,7 @@ class MinionMeister:
             ")"
         )
         values = (server_id, user_id)
-        result = await read_from_database(self.database, sql, values)
+        result = await read_from_database(self.db, sql, values)
         return bool(result[0][0])
 
     async def _select_winner_(self, server_id: int) -> int:
@@ -297,7 +297,7 @@ class MinionMeister:
             "LIMIT 1"
         )
         values = (server_id,)
-        user_id = await read_from_database(self.database, sql, values)
+        user_id = await read_from_database(self.db, sql, values)
         if not user_id:
             raise NoParticipantsError
         return user_id[0][0]
@@ -310,7 +310,7 @@ class MinionMeister:
             "ORDER BY name ASC"
         )
         values = (server_id,)
-        names = await read_from_database(self.database, sql, values)
+        names = await read_from_database(self.db, sql, values)
         if not names:
             raise NoParticipantsError
         return names
@@ -321,7 +321,7 @@ class MinionMeister:
             "VALUES (?, ?, DATE())"
         )
         values = (server_id, user_id)
-        await push_to_database(self.database, sql, values)
+        await push_to_database(self.db, sql, values)
 
     async def _insert_history_(self, server_id: int, user_id: int,
                                date: str) -> None:
@@ -330,7 +330,7 @@ class MinionMeister:
             "VALUES (?, ?, ?)"
         )
         values = (server_id, user_id, date)
-        await push_to_database(self.database, sql, values)
+        await push_to_database(self.db, sql, values)
 
     async def _list_history(self, server_id: int, limit: int) -> list:
         sql = (
@@ -342,7 +342,7 @@ class MinionMeister:
             "LIMIT (?)"
         )
         values = (server_id, limit)
-        history = await read_from_database(self.database, sql, values)
+        history = await read_from_database(self.db, sql, values)
         if not history:
             raise NoMinionMeisterError
         return history
@@ -353,7 +353,7 @@ class MinionMeister:
             "VALUES (?, ?, ?)"
         )
         values = (server_id, user_id, 0)
-        await push_to_database(self.database, sql, values)
+        await push_to_database(self.db, sql, values)
 
     async def _update_count_(self, server_id: int, user_id: int) -> None:
         sql = (
@@ -363,7 +363,7 @@ class MinionMeister:
             "AND user = (?)"
         )
         values = (server_id, user_id)
-        await push_to_database(self.database, sql, values)
+        await push_to_database(self.db, sql, values)
 
     async def _list_counts_(self, server_id: int) -> list:
         sql = (
@@ -375,7 +375,7 @@ class MinionMeister:
             "ORDER BY counts.count DESC"
         )
         values = (server_id,)
-        counts = await read_from_database(self.database, sql, values)
+        counts = await read_from_database(self.db, sql, values)
         if not counts:
             raise NoMinionMeisterError
         return counts
@@ -390,7 +390,7 @@ class MinionMeister:
             "ORDER BY name ASC"
         )
         values = (server_id,)
-        names = await read_from_database(self.database, sql, values)
+        names = await read_from_database(self.db, sql, values)
         if not names:
             raise NoAdminsError
         return names
@@ -401,7 +401,7 @@ class MinionMeister:
             "VALUES (?, ?)"
         )
         values = (server_id, user_id)
-        await push_to_database(self.database, sql, values)
+        await push_to_database(self.db, sql, values)
 
     async def _delete_admin_(self, server_id: int, user_id: int) -> None:
         sql = (
@@ -410,7 +410,7 @@ class MinionMeister:
             "AND user = (?)"
         )
         values = (server_id, user_id)
-        await push_to_database(self.database, sql, values)
+        await push_to_database(self.db, sql, values)
 
     async def _in_admins_(self, server_id: int, user_id: int) -> bool:
         sql = (
@@ -423,5 +423,5 @@ class MinionMeister:
             ")"
         )
         values = (server_id, user_id)
-        result = await read_from_database(self.database, sql, values)
+        result = await read_from_database(self.db, sql, values)
         return bool(result[0][0])

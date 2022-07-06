@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Filename: test_minion_meister.py
+Filename: test_database.py
 Authors:  Yoshi Fu
 Project:  Minion Meister Discord Bot
 Date:     July 24th 2022
@@ -10,10 +10,11 @@ Summary:
 - [TODO]
 """
 
+
 def test_connection(db_conn):
     """ Test if the database connection fixture works. """
     try:
-        _cur = db_conn.cursor()
+        _ = db_conn.cursor()
         assert True
     except AttributeError:
         assert False

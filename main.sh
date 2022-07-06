@@ -14,4 +14,4 @@ python3 create_database.py
 echo finished setting up database
 
 echo starting Discord bot...
-python3 bot.py
+python3 bot.py -w
