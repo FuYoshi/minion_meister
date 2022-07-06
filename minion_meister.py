@@ -189,7 +189,7 @@ class MinionMeister:
         return await self._in_users_(server_id, user_id)
 
     async def show_admins(self, server_id):
-        """ List all participants in the server.
+        """ List all admins in the server.
 
             Parameters:
                 :server_id: int, required
@@ -197,10 +197,10 @@ class MinionMeister:
 
             Returns:
                 :names:
-                    list with the names of all participants.
+                    list with the names of all admins.
 
             Raises:
-                NoParticipantsError, if there are no participants.
+                NoParticipantsError, if there are no admins.
         """
         names = await self._list_admins_(server_id)
         names = [str(name[0]) for name in names]

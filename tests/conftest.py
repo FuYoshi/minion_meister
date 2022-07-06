@@ -13,6 +13,7 @@ Summary:
 import sqlite3
 
 import pytest
+from minion_meister import MinionMeister
 from tools import get_database
 
 
@@ -23,3 +24,21 @@ def db_conn():
     yield conn
 
     conn.close()
+
+
+@pytest.fixture(scope='function')
+def mm():
+    MM = MinionMeister(get_database())
+    return MM
+
+
+@pytest.fixture(scope='function')
+def mm_data():
+    dic = {
+        'sid': 111111,
+        'uid': 000000,
+        'name': 'jesus',
+        'date': '0000-00-00',
+        'limit': 5
+    }
+    return dic
