@@ -11,15 +11,15 @@ Summary:
 """
 
 from discord.ext import commands
-from minion_meister import MinionMeister
-from tools import get_database
+import minion_meister
+import tools
 
 
 class MemberCog(commands.Cog):
     """ Cog with all the commands of a member. """
     def __init__(self, bot):
         self.bot = bot
-        self.MM = MinionMeister(get_database())
+        self.MM = minion_meister.MinionMeister(tools.get_database())
 
     @commands.command(name='add',
                       help="Add yourself to participants with name.")

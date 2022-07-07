@@ -17,10 +17,9 @@ import os
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from error import (DeleteError, InsertError, InvalidDateError, NoAdminsError,
-                   NoMinionMeisterError, NoParticipantsError)
-from tools import argparser
-from webserver import keep_alive
+import error
+import tools
+import webserver
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -42,24 +41,24 @@ async def on_ready():
 
 
 @bot.event
-async def on_command_error(ctx, error):
+async def on_command_error(ctx, err):
     """ Send the corresponding notification on command errors. """
-    if isinstance(error, commands.MemberNotFound):
+    if isinstance(err, commands.MemberNotFound):
         await ctx.send('I could not find that user. Did you mention them?')
-    elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(f'Missing required argument: {error.param.name}.')
-    elif isinstance(error, InsertError):
-        await ctx.send(error.message)
-    elif isinstance(error, DeleteError):
-        await ctx.send(error.message)
-    elif isinstance(error, NoParticipantsError):
+    elif isinstance(err, commands.MissingRequiredArgument):
+        await ctx.send(f'Missing required argument: {err.param.name}.')
+    elif isinstance(err, error.InsertError):
+        await ctx.send(err.message)
+    elif isinstance(err, error.DeleteError):
+        await ctx.send(err.message)
+    elif isinstance(err, error.NoParticipantsError):
         await ctx.send('There are no participants.')
-    elif isinstance(error, NoAdminsError):
+    elif isinstance(err, error.NoAdminsError):
         await ctx.send('There are no admins.')
-    elif isinstance(error, NoMinionMeisterError):
+    elif isinstance(err, error.NoMinionMeisterError):
         await ctx.send('There are no previous Minion Meisters.')
-    elif isinstance(error, InvalidDateError):
-        await ctx.send(f'Date {error.date} should be of format: <yyyy-mm-dd>.')
+    elif isinstance(err, error.InvalidDateError):
+        await ctx.send(f'Date {err.date} should be of format: <yyyy-mm-dd>.')
 
 
 if __name__ == '__main__':
@@ -67,8 +66,8 @@ if __name__ == '__main__':
         bot.load_extension(cog)
 
 
-args = argparser()
+args = tools.argparser()
 if args.webserver:
-    keep_alive()
+    webserver.keep_alive()
 
 bot.run(TOKEN)

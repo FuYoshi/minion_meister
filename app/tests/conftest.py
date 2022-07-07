@@ -10,16 +10,20 @@ Summary:
 - [TODO]
 """
 
+import os
 import sqlite3
 
+import minion_meister
 import pytest
-from minion_meister import MinionMeister
-from tools import get_database
+from dotenv import load_dotenv
+
+load_dotenv()
+DB_FILE = os.getenv('DATABASE_FILE')
 
 
 @pytest.fixture(scope='function')
 def db_conn():
-    conn = sqlite3.connect(get_database())
+    conn = sqlite3.connect(DB_FILE)
 
     yield conn
 
@@ -28,7 +32,7 @@ def db_conn():
 
 @pytest.fixture(scope='function')
 def mm():
-    MM = MinionMeister(get_database())
+    MM = minion_meister.MinionMeister(DB_FILE)
     return MM
 
 

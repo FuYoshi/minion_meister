@@ -30,7 +30,7 @@ def argparser():
     return args
 
 
-async def read_from_database(db_filename: str, sql: str, values=None) -> list:
+async def read_from_db(db_filename: str, sql: str, values=None) -> list:
     """ Perform a SQL Query that reads from the database.
 
         SQL injection is prevented by using bound parameter execution.
@@ -63,7 +63,7 @@ async def read_from_database(db_filename: str, sql: str, values=None) -> list:
     return res
 
 
-async def push_to_database(db_filename: str, sql: str, values=None) -> None:
+async def push_to_db(db_filename: str, sql: str, values=None) -> None:
     """ Perform a SQL Query that alters the database.
 
         SQL injection is prevented by using bound parameter execution.

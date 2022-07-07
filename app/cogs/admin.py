@@ -12,16 +12,16 @@ Summary:
 """
 
 import discord
+import minion_meister
+import tools
 from discord.ext import commands
-from minion_meister import MinionMeister
-from tools import get_database
 
 
 class AdminCog(commands.Cog, name='Admin Commands'):
     """ Cog with all the commands of an admin. """
     def __init__(self, bot):
         self.bot = bot
-        self.MM = MinionMeister(get_database())
+        self.MM = minion_meister.MinionMeister(tools.get_database())
 
     async def cog_check(self, ctx):
         """ Check if the user is an admin (or the owner of the bot). """

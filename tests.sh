@@ -7,8 +7,8 @@
 # Summary:
 
 echo setting up database...
-python3 create_database.py
+python3 database/create_database.py
 echo finished setting up database
 
 echo starting tests...
-pytest ./tests -v -s
+pytest -v -s --asyncio-mode=auto

@@ -12,17 +12,17 @@ Summary:
 """
 
 import discord
+import error
+import minion_meister
+import tools
 from discord.ext import commands
-from error import InvalidDateError
-from minion_meister import MinionMeister
-from tools import get_database, is_date
 
 
 class OwnerCog(commands.Cog, name='Owner Commands'):
     """ Cog with all the commands of an owner. """
     def __init__(self, bot):
         self.bot = bot
-        self.MM = MinionMeister(get_database())
+        self.MM = minion_meister.MinionMeister(tools.get_database())
 
     async def cog_check(self, ctx):
         """ Check if the user is the owner of the bot. """
@@ -72,8 +72,8 @@ class OwnerCog(commands.Cog, name='Owner Commands'):
         if not await self.MM.is_user(ctx.guild.id, user.id):
             await self.MM.add_user(ctx.guild.id, user.id, name)
 
-        if not is_date(date):
-            raise InvalidDateError(date)
+        if not tools.is_date(date):
+            raise error.InvalidDateError(date)
 
         await self.MM.insert_history(ctx.guild.id, user.id, date)
 
@@ -94,8 +94,8 @@ class OwnerCog(commands.Cog, name='Owner Commands'):
         if name is None:
             name = user.display_name
 
-        if not is_date(date):
-            raise InvalidDateError(date)
+        if not tools.is_date(date):
+            raise error.InvalidDateError(date)
 
         await self.MM.delete_history(ctx.guild.id, user.id, date)
 

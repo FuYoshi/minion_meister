@@ -13,8 +13,8 @@ pip3 install -r requirements.txt
 echo finished installing requirements.
 
 echo setting up database...
-python3 create_database.py
+python3 database/create_database.py
 echo finished setting up database
 
 echo starting Discord bot...
-python3 bot.py -w
+python3 app/bot.py -w
