@@ -20,7 +20,7 @@ load_dotenv()
 DB_FILE = os.getenv('DATABASE_FILE')
 
 
-class MemberCog(commands.Cog):
+class MemberCog(commands.Cog, name='Commands'):
     """ Cog with all the commands of a member. """
     def __init__(self, bot):
         self.bot = bot
