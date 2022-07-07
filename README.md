@@ -4,14 +4,14 @@ Minion Meister is a Python Discord bot that chooses a Minion Meister.
 
 ## Usage
 
-Create a database by running:
+Start running the Discord bot by executing the main script:
 ```bash
-python3 create_database.py
+./main.sh
 ```
 
-Start running the bot by running:
+Tests can be performed by executing the test script:
 ```bash
-python3 bot.py
+./test.sh
 ```
 
 # Sources

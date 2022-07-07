@@ -6,7 +6,7 @@ Project:  Minion Meister Discord Bot
 Date:     July 24th 2022
 
 Summary:
-- Contains unit tets for the database.
+- Contains unit tests for the database.
 - [TODO]
 """
 
