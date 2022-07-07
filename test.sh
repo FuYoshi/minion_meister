@@ -5,6 +5,7 @@
 # Date:     July 24th 2022
 
 # Summary:
+# - Start tests.
 
 echo setting up database...
 python3 database/create_database.py
