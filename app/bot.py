@@ -12,25 +12,13 @@ Summary:
 - [TODO]
 """
 
+import argparse
 import os
 
 from discord.ext import commands
 from dotenv import load_dotenv
 
-import error
-import tools
 import webserver
-
-load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-
-
-cogs = [
-    'cogs.member',
-    'cogs.admin',
-    'cogs.owner'
-]
-
 
 bot = commands.Bot(command_prefix='!')
 
@@ -42,32 +30,34 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(ctx, err):
-    """ Send the corresponding notification on command errors. """
-    if isinstance(err, commands.MemberNotFound):
-        await ctx.send('I could not find that user. Did you mention them?')
-    elif isinstance(err, commands.MissingRequiredArgument):
-        await ctx.send(f'Missing required argument: {err.param.name}.')
-    elif isinstance(err, error.InsertError):
-        await ctx.send(err.message)
-    elif isinstance(err, error.DeleteError):
-        await ctx.send(err.message)
-    elif isinstance(err, error.NoParticipantsError):
-        await ctx.send('There are no participants.')
-    elif isinstance(err, error.NoAdminsError):
-        await ctx.send('There are no admins.')
-    elif isinstance(err, error.NoMinionMeisterError):
-        await ctx.send('There are no previous Minion Meisters.')
-    elif isinstance(err, error.InvalidDateError):
-        await ctx.send(f'Date {err.date} should be of format: <yyyy-mm-dd>.')
+    """ Send the error message in text channel. """
+    await ctx.send(err)
+
+
+def argparser():
+    """ Check for commandline arguments. """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-w', '--webserver', action='store_true',
+                        help="Start webserver")
+    arguments = parser.parse_args()
+    return arguments
 
 
 if __name__ == '__main__':
+    load_dotenv()
+    TOKEN = os.getenv('DISCORD_TOKEN')
+
+    cogs = [
+        'cogs.member',
+        'cogs.admin',
+        'cogs.owner'
+    ]
+
     for cog in cogs:
         bot.load_extension(cog)
 
+    args = argparser()
+    if args.webserver:
+        webserver.keep_alive()
 
-args = tools.argparser()
-if args.webserver:
-    webserver.keep_alive()
-
-bot.run(TOKEN)
+    bot.run(TOKEN)

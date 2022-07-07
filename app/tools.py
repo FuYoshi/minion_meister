@@ -11,23 +11,7 @@ Summary:
 - [TODO]
 """
 
-import argparse
-import os
-from datetime import datetime
-
 from aiosqlite import connect
-from dotenv import load_dotenv
-
-
-def argparser():
-    """ Check for commandline arguments. """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--delete', action='store_true',
-                        help="Delete current database")
-    parser.add_argument('-w', '--webserver', action='store_true',
-                        help="Start webserver")
-    args = parser.parse_args()
-    return args
 
 
 async def read_from_db(db_filename: str, sql: str, values=None) -> list:
@@ -89,26 +73,3 @@ async def push_to_db(db_filename: str, sql: str, values=None) -> None:
 
     await cur.close()
     await con.close()
-
-
-def is_date(date: str) -> bool:
-    """ Check if the date is the right format (yyyy-mm-dd).
-
-        Parameters:
-            :date: str, required
-                string containing a date.
-
-        Returns:
-            bool
-    """
-    try:
-        return bool(datetime.strptime(date, '%Y-%m-%d'))
-    except ValueError:
-        return False
-
-
-def get_database():
-    """ Load the database file environment variable and return it. """
-    load_dotenv()
-    DB_FILE = os.getenv('DATABASE_FILE')
-    return DB_FILE

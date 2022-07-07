@@ -11,17 +11,22 @@ Summary:
 - [TODO]
 """
 
+import os
+
 import discord
 import minion_meister
-import tools
 from discord.ext import commands
+from dotenv import load_dotenv
+
+load_dotenv()
+DB_FILE = os.getenv('DATABASE_FILE')
 
 
 class AdminCog(commands.Cog, name='Admin Commands'):
     """ Cog with all the commands of an admin. """
     def __init__(self, bot):
         self.bot = bot
-        self.MM = minion_meister.MinionMeister(tools.get_database())
+        self.MM = minion_meister.MinionMeister(DB_FILE)
 
     async def cog_check(self, ctx):
         """ Check if the user is an admin (or the owner of the bot). """

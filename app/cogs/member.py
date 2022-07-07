@@ -10,16 +10,21 @@ Summary:
 - [TODO]
 """
 
-from discord.ext import commands
+import os
+
 import minion_meister
-import tools
+from discord.ext import commands
+from dotenv import load_dotenv
+
+load_dotenv()
+DB_FILE = os.getenv('DATABASE_FILE')
 
 
 class MemberCog(commands.Cog):
     """ Cog with all the commands of a member. """
     def __init__(self, bot):
         self.bot = bot
-        self.MM = minion_meister.MinionMeister(tools.get_database())
+        self.MM = minion_meister.MinionMeister(DB_FILE)
 
     @commands.command(name='add',
                       help="Add yourself to participants with name.")

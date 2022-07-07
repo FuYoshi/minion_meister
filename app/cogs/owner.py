@@ -11,18 +11,40 @@ Summary:
 - [TODO]
 """
 
+import os
+from datetime import datetime
+
 import discord
 import error
 import minion_meister
-import tools
 from discord.ext import commands
+from dotenv import load_dotenv
+
+load_dotenv()
+DB_FILE = os.getenv('DATABASE_FILE')
+
+
+def is_date(date: str) -> bool:
+    """ Check if the date is the right format (yyyy-mm-dd).
+
+        Parameters:
+            :date: str, required
+                string containing a date.
+
+        Returns:
+            bool
+    """
+    try:
+        return bool(datetime.strptime(date, '%Y-%m-%d'))
+    except ValueError:
+        return False
 
 
 class OwnerCog(commands.Cog, name='Owner Commands'):
     """ Cog with all the commands of an owner. """
     def __init__(self, bot):
         self.bot = bot
-        self.MM = minion_meister.MinionMeister(tools.get_database())
+        self.MM = minion_meister.MinionMeister(DB_FILE)
 
     async def cog_check(self, ctx):
         """ Check if the user is the owner of the bot. """
@@ -72,7 +94,7 @@ class OwnerCog(commands.Cog, name='Owner Commands'):
         if not await self.MM.is_user(ctx.guild.id, user.id):
             await self.MM.add_user(ctx.guild.id, user.id, name)
 
-        if not tools.is_date(date):
+        if not is_date(date):
             raise error.InvalidDateError(date)
 
         await self.MM.insert_history(ctx.guild.id, user.id, date)
@@ -94,7 +116,7 @@ class OwnerCog(commands.Cog, name='Owner Commands'):
         if name is None:
             name = user.display_name
 
-        if not tools.is_date(date):
+        if not is_date(date):
             raise error.InvalidDateError(date)
 
         await self.MM.delete_history(ctx.guild.id, user.id, date)
