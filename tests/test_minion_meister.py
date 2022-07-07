@@ -11,31 +11,37 @@ Summary:
 """
 
 import pytest
+from error import DeleteError, InsertError
 from minion_meister import MinionMeister
 
 
-@pytest.mark.order(1)
 def test_connection(mm: MinionMeister):
     assert mm.database
     assert isinstance(mm.database, str)
     assert mm.database.endswith('.db')
 
 
-@pytest.mark.order(2)
 @pytest.mark.asyncio
 async def test_add_user(mm: MinionMeister, mm_data: dict):
     await mm.add_user(mm_data['sid'], mm_data['uid'], mm_data['name'])
     assert await mm.is_user(mm_data['sid'], mm_data['uid'])
 
 
-@pytest.mark.order(3)
+@pytest.mark.asyncio
+async def test_add_user_error(mm: MinionMeister, mm_data: dict):
+    try:
+        await mm.add_user(mm_data['sid'], mm_data['uid'], mm_data['name'])
+        assert False
+    except InsertError:
+        assert True
+
+
 @pytest.mark.asyncio
 async def test_select_winner(mm: MinionMeister, mm_data: dict):
     uid = await mm.select_winner(mm_data['sid'])
     assert uid == mm_data['uid']
 
 
-@pytest.mark.order(4)
 @pytest.mark.asyncio
 async def test_show_participants(mm: MinionMeister, mm_data: dict):
     names = await mm.show_participants(mm_data['sid'])
@@ -44,7 +50,6 @@ async def test_show_participants(mm: MinionMeister, mm_data: dict):
     assert mm_data['name'] in names
 
 
-@pytest.mark.order(5)
 @pytest.mark.asyncio
 async def test_show_history(mm: MinionMeister, mm_data: dict):
     history = await mm.show_history(mm_data['sid'], mm_data['limit'])
@@ -58,7 +63,6 @@ async def test_show_history(mm: MinionMeister, mm_data: dict):
     assert mm_data['name'] in names
 
 
-@pytest.mark.order(6)
 @pytest.mark.asyncio
 async def test_show_count(mm: MinionMeister, mm_data: dict):
     counts = await mm.show_count(mm_data['sid'])
@@ -73,7 +77,6 @@ async def test_show_count(mm: MinionMeister, mm_data: dict):
     assert count[names.index(mm_data['name'])] >= 1
 
 
-@pytest.mark.order(7)
 @pytest.mark.asyncio
 async def test_insert_history(mm: MinionMeister, mm_data: dict):
     await mm.insert_history(mm_data['sid'], mm_data['uid'], mm_data['date'])
@@ -82,29 +85,32 @@ async def test_insert_history(mm: MinionMeister, mm_data: dict):
     names, dates = await mm.show_history(mm_data['sid'], mm_data['limit'])
     assert mm_data['name'] in names
     assert mm_data['date'] in dates
-    names, count = await mm.show_count(mm_data['sid'])
+    names, _count = await mm.show_count(mm_data['sid'])
     assert mm_data['name'] in names
-    assert count[names.index(mm_data['name'])] >= 2
 
 
-@pytest.mark.order(8)
 @pytest.mark.asyncio
 async def test_delete_history(mm: MinionMeister, mm_data: dict):
     await mm.delete_history(mm_data['sid'], mm_data['uid'], mm_data['date'])
-    names, dates = await mm.show_history(mm_data['sid'], mm_data['limit'])
+    _names, dates = await mm.show_history(mm_data['sid'], mm_data['limit'])
     assert not mm_data['date'] in dates
-    names, count = await mm.show_count(mm_data['sid'])
-    assert not count[names.index(mm_data['name'])] >= 2
 
 
-@pytest.mark.order(9)
 @pytest.mark.asyncio
 async def test_admin_user(mm: MinionMeister, mm_data: dict):
     await mm.admin_user(mm_data['sid'], mm_data['uid'], mm_data['name'])
     assert await mm.is_admin(mm_data['sid'], mm_data['uid'])
 
 
-@pytest.mark.order(10)
+@pytest.mark.asyncio
+async def test_admin_user_error(mm: MinionMeister, mm_data: dict):
+    try:
+        await mm.admin_user(mm_data['sid'], mm_data['uid'], mm_data['name'])
+        assert False
+    except InsertError:
+        assert True
+
+
 @pytest.mark.asyncio
 async def test_show_admins(mm: MinionMeister, mm_data: dict):
     names = await mm.show_admins(mm_data['sid'])
@@ -113,15 +119,31 @@ async def test_show_admins(mm: MinionMeister, mm_data: dict):
     assert mm_data['name'] in names
 
 
-@pytest.mark.order(11)
 @pytest.mark.asyncio
 async def test_unadmin_user(mm: MinionMeister, mm_data: dict):
     await mm.unadmin_user(mm_data['sid'], mm_data['uid'], mm_data['name'])
     assert not await mm.is_admin(mm_data['sid'], mm_data['uid'])
 
 
-@pytest.mark.order(12)
+@pytest.mark.asyncio
+async def test_unadmin_user_error(mm: MinionMeister, mm_data: dict):
+    try:
+        await mm.unadmin_user(mm_data['sid'], mm_data['uid'], mm_data['name'])
+        assert False
+    except DeleteError:
+        assert True
+
+
 @pytest.mark.asyncio
 async def test_remove_user(mm: MinionMeister, mm_data: dict):
     await mm.remove_user(mm_data['sid'], mm_data['uid'], mm_data['name'])
     assert not await mm.is_user(mm_data['sid'], mm_data['uid'])
+
+
+@pytest.mark.asyncio
+async def test_remove_user_error(mm: MinionMeister, mm_data: dict):
+    try:
+        await mm.remove_user(mm_data['sid'], mm_data['uid'], mm_data['name'])
+        assert False
+    except DeleteError:
+        assert True
