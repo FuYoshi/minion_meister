@@ -81,7 +81,6 @@ async def test_show_count(mm: MinionMeister, mm_data: dict):
     assert isinstance(names[0], str)
     assert isinstance(count[0], int)
     assert mm_data['name'] in names
-    assert count[names.index(mm_data['name'])] >= 1
 
 
 @pytest.mark.asyncio
