@@ -28,7 +28,6 @@ async def add_participants(server_id: int):
     await MM.add_user(server_id, 174470439848902657, 'Reno')
     await MM.add_user(server_id, 171666048196673536, 'Wouter')
     await MM.add_user(server_id, 400140550503923713, 'Luke')
-
     await MM.add_user(server_id, 172703726123876353, 'Joppe')
     await MM.add_user(server_id, 476081297777754112, 'Mark')
     await MM.add_user(server_id, 285380929126531072, 'Yoshi')
