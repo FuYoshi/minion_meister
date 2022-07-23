@@ -49,7 +49,8 @@ async def insert_records(server_id: int):
     await MM.insert_history(server_id, 510416926946754580, '2022-06-25')
     await MM.insert_history(server_id, 175728174712356864, '2022-07-02')
     await MM.insert_history(server_id, 174470439848902657, '2022-07-09')
-    await MM.insert_history(server_id, 510416926946754580, '2022-07-09')
+    await MM.insert_history(server_id, 510416926946754580, '2022-07-16')
+    await MM.insert_history(server_id, 171666048196673536, '2022-07-23')
 
 
 async def main():
